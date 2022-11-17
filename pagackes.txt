@@ -1,0 +1,6 @@
+flask
+flask-wtf
+python-dotenv
+flask-bootstrap
+flask-migrate
+mysqlclient
