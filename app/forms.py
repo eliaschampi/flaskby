@@ -3,9 +3,10 @@ from wtforms import (
     StringField,
     PasswordField,
     BooleanField,
+    TextAreaField,
     SubmitField,
 )
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, Length
 
 
 class LoginForm(FlaskForm):
@@ -13,3 +14,13 @@ class LoginForm(FlaskForm):
     password = PasswordField("Contraseña", validators=[DataRequired()])
     remember_me = BooleanField("Recuérdame")
     submit = SubmitField("Ingresar")
+
+class EditProfileForm(FlaskForm):
+    name = StringField('Nombre real', validators=[Length(0, 64)])
+    location = StringField('Locación', validators=[Length(0, 64)])
+    about_me = TextAreaField('Sobre mi')
+    submit = SubmitField('Actualizar')
+
+class PostForm(FlaskForm):
+    body = TextAreaField("¿En que cosita piensas?", validators=[DataRequired()])
+    submit = SubmitField('Postear')

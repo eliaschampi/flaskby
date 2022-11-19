@@ -7,3 +7,4 @@ Flask-Bootstrap
 flask-sqlalchemy
 mysqlclient
 werkzeug
+mariadb

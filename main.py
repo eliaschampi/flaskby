@@ -9,9 +9,12 @@ from flask_login import (
 from werkzeug.urls import url_parse
 from app import create_app
 from app.forms import LoginForm
+from app.forms import EditProfileForm
+from app.forms import PostForm
 from app.db import db
 
 from app.models.usuarios import AnonymousUser, User
+from app.models.posts import Post
 from app.utils.utils import Permission
 from app.utils.decorator import admin_required, permission_required
 
@@ -26,12 +29,6 @@ login.anonymous_user = AnonymousUser
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
-
-
-@app.route("/")
-@login_required
-def index():
-    return render_template("indexCss.html")
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -78,11 +75,45 @@ def for_admins_only():
 def for_moderators_only():
     return "Para moderadores!"
 
+@app.route("/usuario/<username>")
+def user(username):
+    user = User.query.filter_by(username=username).first_or_404()
+    return render_template('user.html', user=user)
+
+@app.route('/edit-profile', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    form = EditProfileForm()
+    if form.validate_on_submit():
+        current_user.name = form.name.data
+        current_user.location = form.location.data
+        current_user.about_me = form.about_me.data
+        db.session.add(current_user._get_current_object())
+        db.session.commit()
+        flash('Tu perfil se actualizó correctamente.')
+        return redirect(url_for('.user', username=current_user.username))
+    form.name.data = current_user.name
+    form.location.data = current_user.location
+    form.about_me.data = current_user.about_me
+    return render_template('edituser.html', form=form)
+
+@app.route('/', methods = ['GET', 'POST'])
+@login_required
+def index():
+    # Añadimos los post
+    form = PostForm()
+    if current_user.can(Permission.WRITE) and form.validate_on_submit():
+        post = Post(body=form.body.data, author=current_user._get_current_object())
+        db.session.add(post)
+        db.session.commit()
+        return redirect(url_for('index'))
+    posts = Post.query.order_by(Post.timestamp.desc()).all()
+    return render_template("index.html", form = form, posts = posts, WRITE = Permission.WRITE)
 
 @app.route("/insert")
 def insert():
-    u = User(username="marcelo", email="marcelo@mail1.com")
-    u.set_password("1301")
+    u = User(username="elias", email="elias@mail1.com")
+    u.set_password("password")
     db.session.add(u)
     db.session.commit()
     return "Insertado"

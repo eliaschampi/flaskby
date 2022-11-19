@@ -3,7 +3,7 @@ from flask_bootstrap import Bootstrap
 from .config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-
+from flask_moment import Moment
 from app.models.posts import Post
 from app.models.usuarios import User
 from app.models.roles import Role
@@ -16,5 +16,5 @@ def create_app():
 
     db = SQLAlchemy(app)
     migrate = Migrate(app, db)
-
+    moment = Moment(app)
     return app
